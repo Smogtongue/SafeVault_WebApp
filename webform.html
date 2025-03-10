@@ -1,0 +1,24 @@
+<!-- webform.html -->
+<form action="/submit" method="post" onsubmit="return validateForm()">
+    <label for="username">Username:</label>
+    <input type="text" id="username" name="username">
+    
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email">
+    
+    <button type="submit">Submit</button>
+</form>
+
+<script>
+function validateForm() {
+    var username = document.getElementById('username').value;
+    var email = document.getElementById('email').value;
+    var regex = /[<>""'/]/;
+
+    if (regex.test(username) || regex.test(email)) {
+        alert('Invalid input detected. Please remove any special characters.');
+        return false;
+    }
+    return true;
+}
+</script>
