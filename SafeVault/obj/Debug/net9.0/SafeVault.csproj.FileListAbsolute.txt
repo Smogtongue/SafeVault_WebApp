@@ -11,6 +11,7 @@ C:\Users\elzof\OneDrive\Desktop\Coursera\SafeVault_WebApp\SafeVault\bin\Debug\ne
 C:\Users\elzof\OneDrive\Desktop\Coursera\SafeVault_WebApp\SafeVault\bin\Debug\net9.0\SafeVault.runtimeconfig.json
 C:\Users\elzof\OneDrive\Desktop\Coursera\SafeVault_WebApp\SafeVault\bin\Debug\net9.0\SafeVault.dll
 C:\Users\elzof\OneDrive\Desktop\Coursera\SafeVault_WebApp\SafeVault\bin\Debug\net9.0\SafeVault.pdb
+C:\Users\elzof\OneDrive\Desktop\Coursera\SafeVault_WebApp\SafeVault\bin\Debug\net9.0\BCrypt.Net-Next.dll
 C:\Users\elzof\OneDrive\Desktop\Coursera\SafeVault_WebApp\SafeVault\bin\Debug\net9.0\BouncyCastle.Crypto.dll
 C:\Users\elzof\OneDrive\Desktop\Coursera\SafeVault_WebApp\SafeVault\bin\Debug\net9.0\Google.Protobuf.dll
 C:\Users\elzof\OneDrive\Desktop\Coursera\SafeVault_WebApp\SafeVault\bin\Debug\net9.0\K4os.Compression.LZ4.dll

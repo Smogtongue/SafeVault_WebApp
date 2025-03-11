@@ -1,22 +1,25 @@
 using System.Data.SqlClient;
 using SafeVault.Utilities; // Ensure this matches the namespace of InputValidation
+using BCrypt.Net; // Add this line
 
 public class DatabaseHandler
 {
     private string connectionString = "Server=localhost;Database=SafeVaultDB;User ID=root;Password=yourpassword;";
 
-    public void InsertUser(string username, string email)
+    public void InsertUser(string username, string email, string password)
     {
         string sanitizedUsername = InputValidation.SanitizeInput(username);
         string sanitizedEmail = InputValidation.SanitizeInput(email);
+        string hashedPassword = BCrypt.Net.BCrypt.HashPassword(password); // Hash the password
 
-        string query = "INSERT INTO Users (Username, Email) VALUES (@Username, @Email)";
+        string query = "INSERT INTO Users (Username, Email, Password) VALUES (@Username, @Email, @Password)";
 
         using (SqlConnection connection = new SqlConnection(connectionString))
         {
             SqlCommand command = new SqlCommand(query, connection);
             command.Parameters.AddWithValue("@Username", sanitizedUsername);
             command.Parameters.AddWithValue("@Email", sanitizedEmail);
+            command.Parameters.AddWithValue("@Password", hashedPassword); // Add the hashed password
 
             connection.Open();
             command.ExecuteNonQuery();

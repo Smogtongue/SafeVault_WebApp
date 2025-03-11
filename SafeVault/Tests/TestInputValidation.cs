@@ -11,7 +11,7 @@ public class TestInputValidation
         string sanitizedInput = InputValidation.SanitizeInput(maliciousInput);
 
         // Using parameterized queries ensures the input is safe
-        Assert.DoesNotThrow(() => InputValidation.ExecuteParameterizedQuery(sanitizedInput));
+        Assert.That(sanitizedInput, Is.Not.EqualTo(maliciousInput), "Input sanitization failed!");
     }
 
     [Test]

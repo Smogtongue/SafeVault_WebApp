@@ -1,4 +1,5 @@
 using MySql.Data.MySqlClient;
+using System.Web;
 
 namespace SafeVault.Utilities
 {
@@ -6,25 +7,20 @@ namespace SafeVault.Utilities
     {
         public static string SanitizeInput(string input)
         {
-            // Basic example for XSS prevention
-            // Note: Consider using a library or framework for better security
-            input = input.Replace("<", "&lt;").Replace(">", "&gt;");
-            input = input.Trim();
-
-            return input;
+            return HttpUtility.HtmlEncode(input.Trim());
         }
-        
-        // Example method for executing parameterized query
+
         public static void ExecuteParameterizedQuery(string userInput)
         {
             string query = "SELECT * FROM Users WHERE Username = @Username";
-            string connectionString = "Server=localhost;Database=SafeVaultDB;User ID=root;Password=yourpassword;"; // Ensure this is a valid connection string
+            string connectionString = Environment.GetEnvironmentVariable("SAFEVAULT_DB_CONNECTION") 
+                                       ?? throw new InvalidOperationException("Database connection string is not set.");
 
             using (MySqlConnection connection = new MySqlConnection(connectionString))
             using (MySqlCommand command = new MySqlCommand(query, connection))
             {
-                command.Parameters.AddWithValue("@Username", userInput);
-                
+                command.Parameters.Add("@Username", MySqlDbType.VarChar).Value = userInput;
+
                 connection.Open();
                 using (MySqlDataReader reader = command.ExecuteReader())
                 {
