@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using System.Data.SqlClient;
+using BCrypt.Net;
 
 namespace SafeVault
 {
@@ -24,16 +25,34 @@ namespace SafeVault
             Console.WriteLine($"Sanitized Email: {sanitizedEmail}");
 
             // Example usage of DatabaseHelper
-            DatabaseHelper.InsertUser(sanitizedUsername, sanitizedEmail);
+            string password = "password123";
+            string hashedPassword = DatabaseHelper.HashPassword(password);
+            DatabaseHelper.InsertUser(sanitizedUsername, sanitizedEmail, hashedPassword);
+
+            // Assign role to user
+            DatabaseHelper.AssignRoleToUser(sanitizedUsername, "user");
 
             // Example usage of DatabaseHelper for login
-            string password = "password123";
             bool loginSuccess = DatabaseHelper.ValidateLogin(sanitizedUsername, password);
             Console.WriteLine($"Login Success: {loginSuccess}");
 
             // Example usage of DatabaseHelper for retrieving user information
             var userInfo = DatabaseHelper.GetUserInfo(sanitizedUsername);
             Console.WriteLine($"User Info: {userInfo}");
+
+            // Example usage of DatabaseHelper for checking user role
+            bool isAdmin = DatabaseHelper.CheckUserRole(sanitizedUsername, "admin");
+            Console.WriteLine($"Is Admin: {isAdmin}");
+
+            // Example usage of restricting access to admin dashboard
+            if (DatabaseHelper.CheckUserRole(sanitizedUsername, "admin"))
+            {
+                Console.WriteLine("Access granted to Admin Dashboard.");
+            }
+            else
+            {
+                Console.WriteLine("Access denied to Admin Dashboard.");
+            }
         }
     }
 
@@ -85,15 +104,16 @@ namespace SafeVault
     {
         private static string connectionString = "your_connection_string_here";
 
-        public static void InsertUser(string username, string email)
+        public static void InsertUser(string username, string email, string password)
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "INSERT INTO Users (Username, Email) VALUES (@Username, @Email)";
+                string query = "INSERT INTO Users (Username, Email, Password) VALUES (@Username, @Email, @Password)";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Username", username);
                     command.Parameters.AddWithValue("@Email", email);
+                    command.Parameters.AddWithValue("@Password", password);
 
                     connection.Open();
                     command.ExecuteNonQuery();
@@ -105,15 +125,14 @@ namespace SafeVault
         {
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                string query = "SELECT COUNT(1) FROM Users WHERE Username = @Username AND Password = @Password";
+                string query = "SELECT Password FROM Users WHERE Username = @Username";
                 using (SqlCommand command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Username", username);
-                    command.Parameters.AddWithValue("@Password", password);
 
                     connection.Open();
-                    int count = (int)command.ExecuteScalar();
-                    return count == 1;
+                    string storedPasswordHash = (string)command.ExecuteScalar();
+                    return BCrypt.Net.BCrypt.Verify(password, storedPasswordHash);
                 }
             }
         }
@@ -141,6 +160,44 @@ namespace SafeVault
                     }
                 }
             }
+        }
+
+        public static bool CheckUserRole(string username, string role)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "SELECT COUNT(1) FROM UserRoles WHERE Username = @Username AND Role = @Role";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Username", username);
+                    command.Parameters.AddWithValue("@Role", role);
+
+                    connection.Open();
+                    int count = (int)command.ExecuteScalar();
+                    return count == 1;
+                }
+            }
+        }
+
+        public static void AssignRoleToUser(string username, string role)
+        {
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                string query = "INSERT INTO UserRoles (Username, Role) VALUES (@Username, @Role)";
+                using (SqlCommand command = new SqlCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Username", username);
+                    command.Parameters.AddWithValue("@Role", role);
+
+                    connection.Open();
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public static string HashPassword(string password)
+        {
+            return BCrypt.Net.BCrypt.HashPassword(password);
         }
 
         // Additional methods for parameterized queries can be added here
